@@ -1,0 +1,35 @@
+# docker-compose.production.yml
+version: '3'
+
+volumes:
+  pg_data:
+  static:
+  media:
+
+# Всё отличие — заменяем build на image и указываем, какой образ использовать
+services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  backend:
+    image: fominta/kittygram_backend
+    env_file: .env
+    volumes:
+      - static:/backend_static
+      - media:/app/media
+  frontend:
+    image: fominta/kittygram_frontend  # Качаем с Docker Hub
+    env_file: .env
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static:/frontend_static
+  gateway:
+    image: fominta/kittygram_gateway  # Качаем с Docker Hub
+    env_file: .env
+    volumes:
+      - static:/staticfiles
+      - media:/app/media
+    ports:
+      - 9000:80
